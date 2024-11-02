@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama_container
+    ports:
+      - "11434:11434"  # Ollama 서버의 API 포트
+    environment:
+      - OLLAMA_MODELS=/models
+    volumes:
+      - ./models:/models  # 모델을 저장할 경로를 로컬과 공유
+    command: sh -c "ollama serve & sleep 5 && ollama pull llama3.1-70b"
+    networks:
+      - rag_network
+
+  rag_system:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rag_system_container
+    volumes:
+      - ./modules:/app/modules  # 코드가 포함된 디렉토리 공유
+    depends_on:
+      - ollama
+    networks:
+      - rag_network
+
+networks:
+  rag_network:
+    driver: bridge
