@@ -1,4 +1,5 @@
 from data_loader import DataLoader
+from datasets import load_from_disk
 from embedding import EmbeddingHandler
 from model import ModelHandler
 from generation import AnswerGenerator
@@ -10,8 +11,7 @@ logging.basicConfig(level=logging.INFO)
 
 # 데이터 로드
 logging.info("Loading dataset...")
-data_loader = DataLoader("rojagtap/tech-qa")
-data = data_loader.load_data()
+data = load_from_disk("/root/YBIGTA_X_KUBIG_Hackathon/combined_dataset")['test']
 
 # # 임베딩 생성 및 삽입
 # logging.info("Inserting data into FAISS index...")
@@ -23,7 +23,7 @@ model_handler = ModelHandler()
 answer_generator = AnswerGenerator(model_handler)
 results = []
 
-for i in range(10):
+for i in tqdm(range(200)):
     question = data[i]["question"]
     logging.info(f"Generating answer for question {i + 1}: {question}")
     result = answer_generator.generate_answer_and_collect_results(question, data)

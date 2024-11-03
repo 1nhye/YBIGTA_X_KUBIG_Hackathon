@@ -1,34 +1,18 @@
-import requests
-import json
+import openai
 import logging
 from ragas import evaluate
 from ragas.metrics import answer_relevancy, context_precision, faithfulness, context_recall
+import os
+from datasets import Dataset
+
 
 class RAGASEvaluator:
     def __init__(self):
-        self.url = "http://ollama_container:11434/generate"  # Ollama API 엔드포인트
-
-    def generate_with_llama(self, text):
-        # Ollama LLaMA 3.1 70B 모델을 통해 평가에 필요한 LLM 응답을 생성합니다
-        payload = {
-            "model": "llama3.1-70b",
-            "text": text
-        }
-        headers = {"Content-Type": "application/json"}
-
-        response = requests.post(self.url, headers=headers, data=json.dumps(payload))
-        if response.status_code == 200:
-            response_data = response.json()
-            return response_data.get("response", "No response")
-        else:
-            logging.error(f"Failed to generate response: {response.text}")
-            return "Error generating response"
+        openai.api_key = os.getenv("OPENAI_API_KEY")
+        if not openai.api_key:
+            raise ValueError("OpenAI API 키가 설정되지 않았습니다. 환경 변수 'OPENAI_API_KEY'를 설정하십시오.")
 
     def evaluate_with_ragas(self, results):
-        # Ollama로 각 평가를 수행합니다
-        for result in results:
-            result["answer"] = self.generate_with_llama(result["question"])
-
         # 평가할 데이터 샘플 생성
         data_samples = {
             'question': [res["question"] for res in results],
@@ -36,7 +20,26 @@ class RAGASEvaluator:
             'contexts': [res["contexts"] for res in results],
             'ground_truth': [res["ground_truth"] for res in results]
         }
+        
+        dataset = Dataset.from_dict(data_samples)
 
         # 평가 수행
-        score = evaluate(data_samples, metrics=[answer_relevancy, context_precision, faithfulness, context_recall])
-        logging.info("Evaluation Score: %s", score)
+        score = evaluate(dataset, metrics=[answer_relevancy, context_precision, faithfulness, context_recall])
+        logging.info("평가 점수: %s", score)
+        return score
+
+# # 사용 예시
+# if __name__ == "__main__":
+#     evaluator = RAGASEvaluator()
+
+#     # 평가할 데이터 예시
+#     results = [
+#         {
+#             "question": "프랑스의 수도는 어디인가요?",
+#             "contexts": ["파리는 프랑스의 수도입니다."],
+#             "ground_truth": "파리"
+#         },
+#         # 추가 데이터 샘플을 여기에 추가할 수 있습니다
+#     ]
+
+#     evaluator.evaluate_with_ragas(results)

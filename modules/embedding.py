@@ -18,8 +18,13 @@ class EmbeddingHandler:
         return embeddings.squeeze().numpy()
 
     def insert_data_into_faiss(self, data):
-        vectors = [self.get_embedding(d["document"]) for d in tqdm(data)]
-        vectors = np.array(vectors)
+        vectors = [self.get_embedding(d["documents"]) for d in tqdm(data)]
+        #faiss의 index를 맞추기 위해 편의상 첫번째 row만 삽입
+        padded_vectors = []
+        for vec in vectors:
+            padded_vectors.append(vec[0])
+
+        vectors = np.array(padded_vectors)
         faiss.normalize_L2(vectors)
         self.index.add(vectors)
         faiss.write_index(self.index, "faiss_index.bin")
