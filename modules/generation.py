@@ -51,5 +51,7 @@ class AnswerGenerator:
             "question": question,
             "answer": answer,
             "contexts": flattened_contexts,  # Pass as a list for RAGAS
-            "ground_truth": data[0]["response"]  # Adjust based on desired ground truth
+            
+            # 직접 eval code를 train set으로 돌려보고 싶다면, train set을 이용해보세요. ground truth를 넣어서 보내야 함! 
+            #"ground_truth": data[0]["response"]  # Adjust based on desired ground truth
         }

@@ -6,6 +6,8 @@ import os
 from datasets import Dataset
 
 
+#open ai api key를 export해보면 사용하실 수 있어요~
+#(터미널에 입력하세요) export OPENAI_API_KEY= 키를 여기다 입력
 class RAGASEvaluator:
     def __init__(self):
         openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -27,19 +29,3 @@ class RAGASEvaluator:
         score = evaluate(dataset, metrics=[answer_relevancy, context_precision, faithfulness, context_recall])
         logging.info("평가 점수: %s", score)
         return score
-
-# # 사용 예시
-# if __name__ == "__main__":
-#     evaluator = RAGASEvaluator()
-
-#     # 평가할 데이터 예시
-#     results = [
-#         {
-#             "question": "프랑스의 수도는 어디인가요?",
-#             "contexts": ["파리는 프랑스의 수도입니다."],
-#             "ground_truth": "파리"
-#         },
-#         # 추가 데이터 샘플을 여기에 추가할 수 있습니다
-#     ]
-
-#     evaluator.evaluate_with_ragas(results)
