@@ -12,8 +12,11 @@ logging.basicConfig(level=logging.INFO)
 
 # 데이터 로드
 logging.info("Loading dataset...")
-data = load_from_disk("/root/YBIGTA_X_KUBIG_Hackathon/combined_dataset")['context_library']
-_question = load_from_disk("/root/YBIGTA_X_KUBIG_Hackathon/combined_dataset")['test']
+#data = load_from_disk("/root/YBIGTA_X_KUBIG_Hackathon/combined_dataset")['context_library']
+data = load_from_disk("/root/YBIGTA_X_KUBIG_Hackathon/combined_dataset")['train']
+# print(data)
+_question = load_from_disk("/root/YBIGTA_X_KUBIG_Hackathon/combined_dataset")['train']
+#_question = load_from_disk("/root/YBIGTA_X_KUBIG_Hackathon/combined_dataset")['test']
 
 
 # # 임베딩 생성 및 삽입
@@ -27,10 +30,10 @@ answer_generator = AnswerGenerator(model_handler)
 results = []
 
 # 질문 개수는 200개 이기 떄문에 range(200)을 걸어두었습니다~!
-for i in tqdm(range(200)):
+for i in tqdm(range(50)):
     question = _question[i]["question"]
     logging.info(f"Generating answer for question {i + 1}: {question}")
-    result = answer_generator.generate_answer_and_collect_results(question, data)
+    result = answer_generator.generate_answer_and_collect_results(question, data, idx = int(i))
     # Answer를 한번 읽어보세요. 양이 길어 우선은 주석처리해두었습니다!
     logging.info(f"Generated Answer : {result}")
     results.append(result)
@@ -41,7 +44,7 @@ breakpoint()
 result = pd.DataFrame(results)
 result.to_csv('submission.csv')
 # 평가 수행
-logging.info("Evaluating results with RAGAS...")
-evaluator = RAGASEvaluator()
-evaluator.evaluate_with_ragas(results)
-logging.info("Evaluation completed successfully.")
+# logging.info("Evaluating results with RAGAS...")
+# evaluator = RAGASEvaluator()
+# evaluator.evaluate_with_ragas(results)
+# logging.info("Evaluation completed successfully.")
